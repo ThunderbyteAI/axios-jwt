@@ -53,10 +53,10 @@ export const setAccessToken = (token: Token) => {
 export const clearAuthTokens = () => AsyncStorage.removeItem(getTokenStorageKey())
 
 // PRIVATE
-const getTokenStorageKey = (): string => `auth-tokens-${process.env.NODE_ENV}`
+const getTokenStorageKey = (): string => `auth-tokens`
 const getAuthTokens = (): IAuthTokens | undefined => {
   const tokensRaw = AsyncStorage.getItem(getTokenStorageKey())
-  if (!tokensRaw) return
+  if (!tokensRaw || typeof tokensRaw !== 'string') return
 
   try {
     // parse stored tokens JSON
