@@ -1,5 +1,6 @@
 import * as jwt from 'jsonwebtoken'
 import { AxiosRequestConfig } from 'axios'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 type RequestsQueue = {
   resolve: (value?: unknown) => void
@@ -36,7 +37,7 @@ export const isLoggedIn = (): boolean => {
   return !!token
 }
 
-export const setAuthTokens = (tokens: IAuthTokens) => localStorage.setItem(getTokenStorageKey(), JSON.stringify(tokens))
+export const setAuthTokens = (tokens: IAuthTokens) => AsyncStorage.setItem(getTokenStorageKey(), JSON.stringify(tokens))
 
 export const setAccessToken = (token: Token) => {
   const tokens = getAuthTokens()
@@ -49,12 +50,12 @@ export const setAccessToken = (token: Token) => {
   setAuthTokens(tokens)
 }
 
-export const clearAuthTokens = () => localStorage.removeItem(getTokenStorageKey())
+export const clearAuthTokens = () => AsyncStorage.removeItem(getTokenStorageKey())
 
 // PRIVATE
 const getTokenStorageKey = (): string => `auth-tokens-${process.env.NODE_ENV}`
 const getAuthTokens = (): IAuthTokens | undefined => {
-  const tokensRaw = localStorage.getItem(getTokenStorageKey())
+  const tokensRaw = AsyncStorage.getItem(getTokenStorageKey())
   if (!tokensRaw) return
 
   try {
@@ -111,7 +112,7 @@ const refreshToken = async (requestRefresh: TokenRefreshRequest): Promise<Token>
     // failed to refresh... check error type
     if (err && err.response && (err.response.status === 401 || err.response.status === 422)) {
       // got invalid token response for sure, remove saved tokens because they're invalid
-      localStorage.removeItem(getTokenStorageKey())
+      AsyncStorage.removeItem(getTokenStorageKey())
       return Promise.reject(`Got 401 on token refresh; Resetting auth token: ${err}`)
     } else {
       // some other error, probably network error
